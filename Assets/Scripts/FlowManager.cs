@@ -16,6 +16,7 @@ public class FlowManager : MonoBehaviour
     public GameObject HandAnimation;
     public List<GameObject> Keypads = new List<GameObject>(); // Arrastra todos los keypads aquí en el Inspector
     public List<GameObject> PasscodeDisplays = new List<GameObject>(); // Arrastrar displays en Inspector
+    public List<GameObject> Cubes = new List<GameObject>(); // Arrastrar los 6 cubos en el Inspector
 
     // Variables para ecuaciones químicas
     private ReactionManager.SerializableChemicalEquation currentEquation;
@@ -50,18 +51,36 @@ public class FlowManager : MonoBehaviour
 
     private void InitializeGame()
     {
+        // Mensajes y UI básica
         GameManager.Instance.UI_Messages.text = "Usa ✋ Thumbs Up para practicar o 🤙 Shaka para comenzar";
         GameManager.Instance.Timer.enabled = false;
         GameManager.Instance.MathematicsValues.gameObject.SetActive(false);
+
+        // Gestos
         GameManager.Instance.RightThumbsUp.gameObject.SetActive(true);
         GameManager.Instance.RightShaka.gameObject.SetActive(true);
         GameManager.Instance.LeftThumbsUp.gameObject.SetActive(false);
+
+        // Ocultación completa de elementos interactivos
         DisableSockets();
         HandAnimation.SetActive(false);
 
+        // Ocultar TODOS los keypads y sus displays
+        foreach (var keypad in Keypads)
+        {
+            if (keypad != null) keypad.SetActive(false);
+        }
 
+        foreach (var display in PasscodeDisplays)
+        {
+            if (display != null) display.SetActive(false);
+        }
+        // Ocultar cubos al inicio
+        foreach (var cube in Cubes)
+        {
+            if (cube != null) cube.SetActive(false);
+        }
     }
-
 
     // --- Gestos ---
     public void RightHandThumpsUpPerformed()
@@ -74,6 +93,21 @@ public class FlowManager : MonoBehaviour
         GameManager.Instance.MathematicsValues.gameObject.SetActive(true);
         EnableSockets();
         HandAnimation.SetActive(true);
+        // Mostrar TODOS los keypads y displays en modo práctica
+        foreach (var keypad in Keypads)
+        {
+            if (keypad != null) keypad.SetActive(true);
+        }
+
+        foreach (var display in PasscodeDisplays)
+        {
+            if (display != null) display.SetActive(true);
+        }
+        // Mostrar cubos SOLO en práctica
+        foreach (var cube in Cubes)
+        {
+            if (cube != null) cube.SetActive(true);
+        }
 
     }
 
@@ -87,7 +121,11 @@ public class FlowManager : MonoBehaviour
         GameManager.Instance.LeftThumbsUp.gameObject.SetActive(false); // Ocultar hasta terminar
         StartNewChemicalEquation();
         StartCountdown();
-
+        // Ocultar cubos en modo juego
+        foreach (var cube in Cubes)
+        {
+            if (cube != null) cube.SetActive(false);
+        }
     }
 
     public void LeftHandThumpsUpPerformed()

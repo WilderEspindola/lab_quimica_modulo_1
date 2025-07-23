@@ -15,6 +15,7 @@ public class FlowManager : MonoBehaviour
     public List<GameObject> Sockets = new List<GameObject>();
     public GameObject HandAnimation;
     public List<GameObject> Keypads = new List<GameObject>(); // Arrastra todos los keypads aquí en el Inspector
+    public List<GameObject> PasscodeDisplays = new List<GameObject>(); // Arrastrar displays en Inspector
 
     // Variables para ecuaciones químicas
     private ReactionManager.SerializableChemicalEquation currentEquation;
@@ -185,41 +186,73 @@ public class FlowManager : MonoBehaviour
     {
         Transform valuesParent = GameManager.Instance.MathematicsValues.transform;
 
-        // Paso 1: Ocultar todos los elementos primero
+        // Paso 1: Ocultar todos los elementos UI primero
         for (int i = 0; i < valuesParent.childCount; i++)
         {
             valuesParent.GetChild(i).gameObject.SetActive(false);
         }
 
-        // Paso 2: Procesar REACTIVOS (A, B, C)
+        // Paso 2: Inicializar todos los keypads y displays como ocultos
+        foreach (var keypad in Keypads)
+        {
+            if (keypad != null) keypad.SetActive(false);
+        }
+
+        foreach (var display in PasscodeDisplays)
+        {
+            if (display != null) display.SetActive(false);
+        }
+
+        // Paso 3: Procesar REACTIVOS (A, B, C)
         for (int i = 0; i < currentEquation.reactants.Count; i++)
         {
-            // Mostrar fórmula química (A=0, B=2, C=4)
+            char variable = (char)('A' + i);
             int textIndex = i * 2;
+
+            // Mostrar fórmula química
             TextMeshPro textElement = valuesParent.GetChild(textIndex).GetComponent<TextMeshPro>();
             textElement.text = currentEquation.reactants[i].formula;
             textElement.gameObject.SetActive(true);
 
-            // Mostrar signo + (índices 1, 3) solo si hay siguiente reactivo
+            // Mostrar keypad y display correspondientes (A=0, B=1, C=2)
+            if (i < Keypads.Count)
+            {
+                Keypads[i].SetActive(true);
+                if (i < PasscodeDisplays.Count && PasscodeDisplays[i] != null)
+                    PasscodeDisplays[i].SetActive(true);
+            }
+
+            // Mostrar signo + si hay siguiente reactivo
             if (i < currentEquation.reactants.Count - 1)
             {
                 valuesParent.GetChild(textIndex + 1).gameObject.SetActive(true);
             }
         }
 
-        // Paso 3: Mostrar IGUAL (índice 5) SIEMPRE
+        // Paso 4: Mostrar IGUAL (índice 5) SIEMPRE
         valuesParent.GetChild(5).gameObject.SetActive(true);
 
-        // Paso 4: Procesar PRODUCTOS (D=6, E=8, F=10)
+        // Paso 5: Procesar PRODUCTOS (D, E, F)
         for (int i = 0; i < currentEquation.products.Count; i++)
         {
-            // Mostrar fórmula química (D=6, E=8, F=10)
+            char variable = (char)('D' + i);
             int textIndex = 6 + i * 2;
+
+            // Mostrar fórmula química
             TextMeshPro textElement = valuesParent.GetChild(textIndex).GetComponent<TextMeshPro>();
             textElement.text = currentEquation.products[i].formula;
             textElement.gameObject.SetActive(true);
 
-            // Mostrar signo + (índices 7, 9) solo si hay siguiente producto
+            // Mostrar keypad y display correspondientes (D=3, E=4, F=5)
+            int keypadIndex = 3 + i;
+            if (keypadIndex < Keypads.Count)
+            {
+                Keypads[keypadIndex].SetActive(true);
+                if (keypadIndex < PasscodeDisplays.Count && PasscodeDisplays[keypadIndex] != null)
+                    PasscodeDisplays[keypadIndex].SetActive(true);
+            }
+
+            // Mostrar signo + si hay siguiente producto
             if (i < currentEquation.products.Count - 1)
             {
                 valuesParent.GetChild(textIndex + 1).gameObject.SetActive(true);
